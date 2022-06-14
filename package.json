@@ -2,8 +2,12 @@
   "name": "battlesnake",
   "version": "1.0.0",
   "description": "My own battlesnake",
-  "main": "main.js",
+  "main": "snake.js",
   "repository": "git@github.com:robvanderleek/battlesnake.git",
   "author": "Rob van der Leek <robvanderleek@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.1",
+    "localtunnel": "^2.0.2"
+  }
 }
