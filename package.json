@@ -1,0 +1,9 @@
+{
+  "name": "battlesnake",
+  "version": "1.0.0",
+  "description": "My own battlesnake",
+  "main": "main.js",
+  "repository": "git@github.com:robvanderleek/battlesnake.git",
+  "author": "Rob van der Leek <robvanderleek@gmail.com>",
+  "license": "MIT"
+}
