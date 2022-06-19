@@ -6,8 +6,14 @@
   "repository": "git@github.com:robvanderleek/battlesnake.git",
   "author": "Rob van der Leek <robvanderleek@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "dev": "node snake.js"
+  },
   "dependencies": {
     "express": "^4.18.1",
     "localtunnel": "^2.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.16"
   }
 }
