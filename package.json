@@ -7,7 +7,8 @@
   "author": "Rob van der Leek <robvanderleek@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "dev": "node snake.js"
+    "dev": "nodemon snake.js",
+    "tunnel": "lt --port 3000 --subdomain '83-81-204-111-battlesnake'"
   },
   "dependencies": {
     "express": "^4.18.1",

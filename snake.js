@@ -5,7 +5,6 @@ const packageJson = require('./package.json');
 
 const app = express();
 const port = 3000;
-const subdomain = 'battlesnake-83-81-204-111';
 
 app.use(express.json());
 
@@ -54,23 +53,4 @@ app.post('/move', (req, res) => {
     }
 });
 
-async function startTunnel() {
-    const tunnel = await localtunnel({port: port, subdomain: subdomain});
-    console.log(tunnel.url);
-    tunnel.on('close', () => { console.log('tunnel closed') });
-    process.on("SIGINT", () => {
-      tunnel.close();
-      process.exit(0);
-    });
-    return tunnel;
-}
-
-(async () => { 
-    const tunnel = await startTunnel(); 
-    try {
-        app.listen(port, () => { console.log(`App listening on port ${port}`); });
-    } catch (e) {
-        tunnel.close();
-        console.error(e);
-    }
-})();
+app.listen(port, () => { console.log(`App listening on port ${port}`); });
