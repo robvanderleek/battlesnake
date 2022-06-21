@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 const express = require('express');
-const localtunnel = require('localtunnel');
 const packageJson = require('./package.json');
 
 const app = express();
@@ -28,25 +27,34 @@ app.post('/start', (req, res) => {
 
 const equal = (p1, p2) => p1.x === p2.x && p1.y === p2.y;
 
-const free = (snake, p) => !snake.body.some(bp => equal(p, bp));
+const freeCell = (cells, c) => !cells.some(p => equal(c, p));
 
-const right = (snake, board) => snake.head.x < board.width - 1 &&
-    free(snake, {x: snake.head.x + 1, y: snake.head.y});
+const snakeCells = (board) => {
+    let result = [];
+    for (const s of board.snakes) {
+        result = result.concat(s.body);
+    } 
+    return result;
+}
 
-const down = (snake, board) => snake.head.y > 0 &&
-    free(snake, {x: snake.head.x, y: snake.head.y - 1});
+const right = (snake, sc, board) => snake.head.x < board.width - 1 &&
+    freeCell(sc, {x: snake.head.x + 1, y: snake.head.y});
 
-const left = (snake, board) => snake.head.x > 0 &&
-    free(snake, {x: snake.head.x - 1, y: snake.head.y});
+const down = (snake, sc) => snake.head.y > 0 &&
+    freeCell(sc, {x: snake.head.x, y: snake.head.y - 1});
+
+const left = (snake, sc) => snake.head.x > 0 &&
+    freeCell(sc, {x: snake.head.x - 1, y: snake.head.y});
 
 app.post('/move', (req, res) => {
     const {turn, you: snake, board} = req.body;
     console.log(`/move called for turn: ${turn}`); 
-    if (right(snake, board)) {
+    const sc = snakeCells(board); 
+    if (right(snake, sc, board)) {
         res.send({'move': 'right'});
-    } else if (down(snake, board)) {
+    } else if (down(snake, sc)) {
         res.send({'move': 'down'});
-    } else if (left(snake, board)) {
+    } else if (left(snake, sc)) {
         res.send({'move': 'left'});
     } else {
         res.send({'move': 'up'});
