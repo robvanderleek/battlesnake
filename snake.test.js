@@ -1,5 +1,5 @@
-const {equal, distance, nearestFood} = require("./utils");
 const {expect} = require("expect");
+const {equal, distance, nearestFood} = require("./snake");
 
 test('equal', () => {
     expect(equal({x: 1, y: 3}, {x: 1, y: 3})).toBeTruthy();

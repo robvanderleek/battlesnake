@@ -8,8 +8,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "nodemon snake.js",
-    "rettun": "tm --subdomain '83-81-204-111-battlesnake'",
-    "loctun": "tm --tm-host http://localtest.me --subdomain '83-81-204-111-battlesnake'"
+    "tunnel": "ssh -R battlesnake-js-robvanderleek:80:localhost:3000 serveo.net"
   },
   "dependencies": {
     "express": "^4.18.1"
