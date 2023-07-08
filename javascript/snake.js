@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-const express = require('express');
-const packageJson = require('./package.json');
+const http = require('http');
 const PORT = 3000;
 
 const equal = (p1, p2) => p1.x === p2.x && p1.y === p2.y;
@@ -67,44 +66,54 @@ const dirOrder = (snake, board) => {
     return order;
 }
 
-const main = () => {
-    const app = express();
-    app.use(express.json());
-    app.get('/', (req, res) => {
-        console.log('/ called!');
-        const response = {
-            'apiversion': '1',
-            'author': 'robvanderleek',
-            'color': '#C00000',
-            'head': 'caffeine',
-            'tail': 'curled',
-            'version': packageJson.version
-        }
-        res.send(response);
-    });
-    app.post('/start', (req) => {
-        const body = req.body;
-        console.log(`/start called for game: ${body.game.id}`);
-    });
-    app.post('/move', (req, res) => {
-        const {turn, you: snake, board} = req.body;
-        console.log(`/move called for turn: ${turn}`);
-        const sc = snakeCells(board);
-        const order = dirOrder(snake, board);
-        const dir = go(board, snake, sc, order);
-        res.send({'move': dir});
-    });
-    app.listen(PORT, () => {
-        console.log(`App listening on port ${PORT}`);
+const handleGetMetaData = (req, res) => {
+    const response = {
+        'apiversion': '1',
+        'author': 'robvanderleek',
+        'color': '#C00000',
+        'head': 'caffeine',
+        'tail': 'curled',
+        'version': '1.0'
+    }
+    res.end(JSON.stringify(response));
+}
+
+const handleWithBody = (req, res, handler) => {
+    let body = [];
+    req.on('data', (chunk) => {
+        body.push(chunk);
+    }).on('end', () => {
+        body = Buffer.concat(body).toString();
+        handler(req, res, JSON.parse(body));
     });
 }
 
-if (require.main === module) {
-    main();
+const handleGameStart = (req, res, body) => {
+    console.log(`Game started: ${body.game.id}`);
+    res.writeHead(200);
 }
 
-module.exports = {
-    equal: equal,
-    distance: distance,
-    nearestFood: nearestFood
+const handleMove = (req, res, body) => {
+    const {turn, you: snake, board} = body;
+    console.log(`/move called for turn: ${turn}`);
+    const sc = snakeCells(board);
+    const order = dirOrder(snake, board);
+    const dir = go(board, snake, sc, order);
+    res.setHeader('Content-Type', 'application/json');
+    res.writeHead(200);
+    res.end(`{"move": "${dir}"}`);
 }
+
+const requestHandler = (req, res) => {
+    if (req.url === '/') {
+        handleGetMetaData(req, res);
+    } else if (req.url === '/start') {
+        handleWithBody(req, res, handleGameStart);
+    } else if (req.url === '/move') {
+        handleWithBody(req, res, handleMove);
+    }
+}
+
+const server = http.createServer(requestHandler);
+server.listen(PORT, '0.0.0.0', 
+    () => console.log(`Battlesnake server running on port: ${PORT}`));
