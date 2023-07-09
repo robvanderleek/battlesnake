@@ -10,60 +10,31 @@ const nearestFood = (snake, food) => food.sort((f1, f2) => distance(snake.head, 
 
 const freeCell = (cells, c) => !cells.some(p => equal(c, p));
 
-const snakeCells = (board) => {
-    let result = [];
-    for (const s of board.snakes) {
-        result = result.concat(s.body);
-    }
-    return result;
-}
+const snakeCells = (board) => board.snakes.flatMap(s => s.body);
 
-const right = (snake, sc, board) => snake.head.x < board.width - 1 &&
+const rightFree = (snake, sc, board) => snake.head.x < board.width - 1 &&
     freeCell(sc, {x: snake.head.x + 1, y: snake.head.y});
 
-const down = (snake, sc) => snake.head.y > 0 &&
+const downFree = (snake, sc) => snake.head.y > 0 &&
     freeCell(sc, {x: snake.head.x, y: snake.head.y - 1});
 
-const left = (snake, sc) => snake.head.x > 0 &&
+const leftFree = (snake, sc) => snake.head.x > 0 &&
     freeCell(sc, {x: snake.head.x - 1, y: snake.head.y});
 
-const up = (snake, sc, board) => snake.head.y < board.height - 1 &&
+const upFree = (snake, sc, board) => snake.head.y < board.height - 1 &&
     freeCell(sc, {x: snake.head.x, y: snake.head.y + 1});
 
-const go = (board, snake, sc, directions) => {
-    for (const d of directions) {
-        if (d === 'right' && right(snake, sc, board)) {
-            return 'right';
-        }
-        if (d === 'down' && down(snake, sc)) {
-            return 'down';
-        }
-        if (d === 'left' && left(snake, sc)) {
-            return 'left';
-        }
-        if (d === 'up' && up(snake, sc, board)) {
-            return 'up';
-        }
-    }
-}
-
-const dirOrder = (snake, board) => {
+const getDirection = (board, snake, sc) => {
     const f = nearestFood(snake, board.food);
-    let order = ['right', 'down', 'left', 'up'];
-    if (f) {
-        if (snake.head.x > f.x) {
-            order[0] = 'left';
-            order[2] = 'right';
-        }
-        if (snake.head.y < f.y) {
-            order[1] = 'up';
-            order[3] = 'down';
-        }
-        if (snake.head.x === f.x) {
-            order = [order[1], order[3], order[0], order[2]]
-        }
+    if (snake.head.x > f.x && leftFree(snake, sc)) {
+        return 'left';
+    } else if (snake.head.x < f.x && rightFree(snake, sc, board)) {
+        return 'right';
+    } else if (snake.head.y < f.y && upFree(snake, sc, board)) {
+        return 'up';
+    } else {
+        return 'down';
     }
-    return order;
 }
 
 const handleGetMetaData = (req, res) => {
@@ -97,8 +68,7 @@ const handleMove = (req, res, body) => {
     const {turn, you: snake, board} = body;
     console.log(`/move called for turn: ${turn}`);
     const sc = snakeCells(board);
-    const order = dirOrder(snake, board);
-    const dir = go(board, snake, sc, order);
+    const dir = getDirection(board, snake, sc);
     res.setHeader('Content-Type', 'application/json');
     res.writeHead(200);
     res.end(`{"move": "${dir}"}`);
