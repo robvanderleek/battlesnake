@@ -1,8 +1,51 @@
 #!/usr/bin/env python
 import json
+import math
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 PORT=3001
+
+def distance(p1, p2):
+    return math.sqrt(pow(p2['x'] - p1['x'], 2) + pow(p2['y'] - p1['y'], 2))
+
+def nearest_food(head, food):
+    food.sort(key=lambda f: distance(head, f))
+    return food[0]
+
+def free_cell(board, x, y):
+    for s in board['snakes']:
+        if {'x': x, 'y': y} in s['body']:
+            return False
+    return x >= 0 and y >= 0 and x < board['width'] and y < board['height']
+
+def preferred_directions(board, head):
+    food = nearest_food(head, board['food'])
+    if head['x'] > food['x']:
+        return ['left', 'down', 'up', 'right'];
+    elif head['x'] < food['x']:
+        return ['right', 'down', 'up', 'left'];
+    elif head['y'] < food['y']:
+        return ['up', 'left', 'right', 'down'];
+    else:
+        return ['down', 'left', 'right', 'up'];
+
+def select_direction(board, head, directions):
+    for d in directions:
+        if d == 'left' and free_cell(board, head['x'] - 1, head['y']):
+            return 'left'
+        if d == 'right' and free_cell(board, head['x'] + 1, head['y']):
+            return 'right'
+        if d == 'down' and free_cell(board, head['x'], head['y'] - 1):
+            return 'down'
+        if d == 'up' and free_cell(board, head['x'], head['y'] + 1):
+            return 'up'
+    else:
+        print('Oops')
+
+def get_direction(board, snake):
+    head = snake['head']
+    directions = preferred_directions(board, head)
+    return select_direction(board, head, directions)
 
 def get_body(request_handler):
     content_length = int(request_handler.headers['Content-Length'])
@@ -33,6 +76,12 @@ def handle_move(request_handler):
     body = get_body(request_handler)
     turn = body['turn']
     print(f'Turn: {turn}')
+    board = body['board']
+    snake = body['you']
+    direction = get_direction(board, snake)
+    request_handler.send_response(200)
+    request_handler.end_headers()
+    request_handler.wfile.write(f'{{"move": "{direction}"}}'.encode('utf-8'))
 
 class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
