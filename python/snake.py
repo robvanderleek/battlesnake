@@ -56,14 +56,15 @@ def get_direction(board, snake):
 
 def preferred_directions(board, head):
     food = nearest_food(head, board['food'])
-    if head['x'] > food['x']:
-        return ['left', 'down', 'up', 'right'];
-    elif head['x'] < food['x']:
-        return ['right', 'down', 'up', 'left'];
-    elif head['y'] < food['y']:
-        return ['up', 'left', 'right', 'down'];
-    else:
-        return ['down', 'left', 'right', 'up'];
+    result = []
+    if head['x'] != food['x']:
+        result.append('right' if head['x'] < food['x'] else 'left')
+    if head['y'] != food['y']:
+        result.append('up' if head['y'] < food['y'] else 'down')
+    for d in ['right', 'down', 'left', 'up']:
+        if not d in result:
+            result.append(d)
+    return result
 
 def nearest_food(head, food):
     food.sort(key=lambda f: distance(head, f))

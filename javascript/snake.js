@@ -54,15 +54,15 @@ const getDirection = (board, snake) => {
 
 const preferredDirections = (board, head) => {
     const food = nearestFood(head, board.food);
-    if (head.x > food.x) {
-        return ['left', 'down', 'up', 'right'];;
-    } else if (head.x < food.x) {
-        return ['right', 'down', 'up', 'left'];
-    } else if (head.y < food.y) {
-        return ['up', 'left', 'right', 'down'];
-    } else {
-        return ['down', 'left', 'right', 'up'];
+    let result = []
+    if (head.y != food.y) {
+        result.push(head.y < food.y ? 'up' : 'down');
     }
+    if (head.x != food.x) {
+        result.push(head.x < food.x ? 'right' : 'left');
+    }
+    return result.concat(['left', 'up', 'right', 'down']
+        .filter(d => !result.includes(d)));
 }
 
 const nearestFood = (head, food) => food.sort((f1, f2) => distance(head, f1) - distance(head, f2))[0]
